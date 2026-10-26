@@ -58,7 +58,7 @@ works.forEach((work, index) => {
   card.dataset.reveal = '';
   card.dataset.types = work.types.join(' ');
   card.style.setProperty('--reveal-delay', `${index % 3 * 80}ms`);
-  card.innerHTML = `<button type="button" class="work-photo media" data-work="${index}" aria-label="Рассмотреть: ${escapeHTML(work.name)}"><img src="${escapeHTML(work.image)}" alt="${escapeHTML(work.name)}, украшение Ирины Маркиной" loading="lazy" width="600" height="750"><span class="image-fallback" hidden>Фото не загрузилось. Откройте карточку, чтобы перейти к публикации.</span><span class="work-category">${escapeHTML(work.category)}</span><span class="work-open">${arrow}</span></button><div class="work-info"><div><h3>${escapeHTML(work.name)}</h3><p>${escapeHTML(work.detail)}</p></div><span>${String(index + 1).padStart(2, '0')}</span></div>`;
+  card.innerHTML = `<button type="button" class="work-photo media" data-work="${index}" aria-label="Рассмотреть: ${escapeHTML(work.name)}"><img src="${escapeHTML(work.image)}" alt="${escapeHTML(work.name)}, украшение Ирины Маркиной" loading="lazy" width="600" height="750"><span class="image-fallback" hidden>Фото не загрузилось. Откройте карточку, чтобы перейти к публикации.</span><span class="work-category">${escapeHTML(work.category)}</span><span class="work-open">Подробнее${arrow}</span></button><div class="work-info"><div><h3>${escapeHTML(work.name)}</h3><p>${escapeHTML(work.detail)}</p></div><span>${String(index + 1).padStart(2, '0')}</span></div>`;
   grid.append(card);
 });
 
