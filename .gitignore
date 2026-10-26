@@ -4,3 +4,7 @@
 *.log
 .DS_Store
 Thumbs.db
+.cms-data/
+.venv/
+__pycache__/
+*.pyc

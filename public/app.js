@@ -1,13 +1,52 @@
-const works = [
-  { name: 'Цветочная история', image: 'bridal', category: 'Серьги', detail: 'Цветы и речной жемчуг', types: ['earrings', 'wedding'], post: '555', description: 'Цветочные серьги из холодного фарфора с речным жемчугом. Нежный акцент для особенного дня.' },
-  { name: 'Винтажная роза', image: 'rose', category: 'Серьги', detail: 'Винтажное настроение', types: ['earrings'], post: '561', description: 'Рельефная роза в винтажном обрамлении. Работа из авторской серии Ирины «Винтажная роза».' },
-  { name: 'Лисички', image: 'fox', category: 'Серьги', detail: 'Немного доброй иронии', types: ['earrings'], post: '515', description: 'Рыжие лисички, которые добавляют образу тепла и немного игривости.' },
-  { name: 'Мальтийские кресты', image: 'cross', category: 'Серьги', detail: 'Выразительная форма', types: ['earrings'], post: '534', description: 'Декоративные серьги с мотивом мальтийского креста. В авторском канале представлены разные цветовые варианты.' },
-  { name: 'Матрёшка', image: 'matryoshka', category: 'Подвеска', detail: 'Русские мотивы', types: ['pendants'], post: '524', description: 'Маленькая матрёшка как самостоятельное украшение. Деталь с узнаваемым характером.' },
-  { name: 'Жуки и мухи', image: 'insects', category: 'Серьги', detail: 'Неожиданный природный мотив', types: ['earrings'], post: '558', description: 'Неожиданный природный мотив в тёмном цвете. Для тех, кому нравятся необычные акценты.' },
-];
 const $ = selector => document.querySelector(selector);
 const $$ = selector => [...document.querySelectorAll(selector)];
+const [pageContent, fields] = await Promise.all([
+  fetch('/api/content', { cache: 'no-store', signal: AbortSignal.timeout(5000) })
+    .then(response => { if (!response.ok) throw new Error('Content unavailable'); return response.json(); })
+    .then(data => data.content)
+    .catch(() => fetch('/content.json').then(response => response.json())),
+  fetch('/admin/fields.json').then(response => response.json()),
+]);
+const works = pageContent.products.filter(work => work.visible);
+// Editors enter plain text. No content from the CMS is interpreted as HTML.
+const escapeHTML = value => String(value).replace(/[&<>"']/g, character => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[character]));
+fields.forEach(field => $$(field.selector).forEach(element => {
+  const value = pageContent.sections[field.id];
+  if (field.attribute) {
+    element.setAttribute(field.attribute, field.type === 'phone' ? `tel:${value}` : value);
+  } else {
+    const icons = [...element.querySelectorAll(':scope > svg')];
+    if (field.id === 'looksTitle' && value.includes('\n')) {
+      const [first, ...rest] = value.split('\n');
+      const accent = document.createElement('span'); accent.textContent = rest.join('\n');
+      element.replaceChildren(document.createTextNode(first + '\n'), accent);
+    } else element.replaceChildren(document.createTextNode(value), ...icons);
+    element.style.whiteSpace = 'pre-line';
+  }
+}));
+$('.question-list').replaceChildren(...pageContent.faq.map(item => {
+  const details = document.createElement('details');
+  const summary = document.createElement('summary');
+  const plus = document.createElement('span'); plus.textContent = '+'; plus.setAttribute('aria-hidden', 'true');
+  summary.append(document.createTextNode(item.question), plus);
+  const answer = document.createElement('p'); answer.textContent = item.answer;
+  details.append(summary, answer); return details;
+}));
+pageContent.steps.forEach((step, index) => {
+  const item = $$('.steps li')[index];
+  item.querySelector('h3').textContent = step.title;
+  item.querySelector('p').textContent = step.text;
+});
+pageContent.stories.forEach((story, index) => {
+  const image = $(`[data-slide-image="${index}"]`);
+  image.src = story.image; image.alt = story.name;
+  const detail = $(`[data-detail-image="${index}"]`);
+  detail.src = story.detailImage; detail.alt = story.name;
+  $(`[data-slide="${index}"]`).setAttribute('aria-label', story.name);
+});
+$('[data-filter="all"] span').textContent = works.length;
+$('#selected-work').replaceChildren(new Option('Пока выбираю', 'Пока выбираю'), ...works.map(work => new Option(work.name, work.id)), new Option('Своя идея', 'Своя идея'));
+$('#empty-state').hidden = works.length > 0;
 const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)');
 const scrollBehavior = () => reduceMotion.matches ? 'instant' : 'smooth';
 const arrow = '<svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg>';
@@ -19,7 +58,7 @@ works.forEach((work, index) => {
   card.dataset.reveal = '';
   card.dataset.types = work.types.join(' ');
   card.style.setProperty('--reveal-delay', `${index % 3 * 80}ms`);
-  card.innerHTML = `<button type="button" class="work-photo media" data-work="${index}" aria-label="Рассмотреть: ${work.name}"><img src="/assets/${work.image}.webp" alt="${work.name}, украшение Ирины Маркиной" loading="lazy" width="600" height="750"><span class="image-fallback" hidden>Фото не загрузилось. Откройте карточку, чтобы перейти к публикации.</span><span class="work-category">${work.category}</span><span class="work-open">${arrow}</span></button><div class="work-info"><div><h3>${work.name}</h3><p>${work.detail}</p></div><span>0${index + 1}</span></div>`;
+  card.innerHTML = `<button type="button" class="work-photo media" data-work="${index}" aria-label="Рассмотреть: ${escapeHTML(work.name)}"><img src="${escapeHTML(work.image)}" alt="${escapeHTML(work.name)}, украшение Ирины Маркиной" loading="lazy" width="600" height="750"><span class="image-fallback" hidden>Фото не загрузилось. Откройте карточку, чтобы перейти к публикации.</span><span class="work-category">${escapeHTML(work.category)}</span><span class="work-open">${arrow}</span></button><div class="work-info"><div><h3>${escapeHTML(work.name)}</h3><p>${escapeHTML(work.detail)}</p></div><span>${String(index + 1).padStart(2, '0')}</span></div>`;
   grid.append(card);
 });
 
@@ -68,7 +107,7 @@ $$('[data-filter]').forEach(button => button.addEventListener('click', () => {
 
 // The photograph is the story: an outfit and its corresponding piece change together.
 // The page background never moves. Only the photo layers crossfade inside their clips.
-const stories = [works[0], works[2], works[1]];
+const stories = pageContent.stories;
 let currentStory = 0;
 let storyTimer;
 let stageVisible = false;
@@ -109,7 +148,7 @@ function showStory(index) {
   const work = stories[index];
   $('#hero-work-name').textContent = work.name;
   $('#slide-current').textContent = `0${index + 1}`;
-  $('#hero-publication').href = `https://t.me/farfforija/${work.post}`;
+  $('#hero-publication').href = work.source;
   $('#hero-publication').setAttribute('aria-label', `Публикация мастера: ${work.name}`);
 }
 new IntersectionObserver(entries => {
@@ -215,17 +254,18 @@ const workDialog = $('#work-dialog');
 let selectedWork = works[0];
 $$('[data-work]').forEach(button => button.addEventListener('click', () => {
   selectedWork = works[Number(button.dataset.work)];
-  $('#work-image').src = `/assets/${selectedWork.image}.webp`;
+  $('#work-image').src = selectedWork.image;
   $('#work-image').alt = selectedWork.name;
   $('#work-title').textContent = selectedWork.name;
   $('#work-type').textContent = `${selectedWork.category} · ${selectedWork.detail}`;
   $('#work-description').textContent = selectedWork.description;
-  $('#work-source').href = `https://t.me/farfforija/${selectedWork.post}`;
+  $('#work-source').href = selectedWork.source || pageContent.sections.telegram;
+  $('#work-source').hidden = !selectedWork.source;
   workDialog.showModal();
   animateDialog(workDialog);
 }));
 $('#choose-work').addEventListener('click', async () => {
-  $('#selected-work').value = selectedWork.name;
+  $('#selected-work').value = selectedWork.id;
   $('#message-result').hidden = true;
   await closeDialog(workDialog);
   $('#contact').scrollIntoView({ behavior: scrollBehavior() });
@@ -275,11 +315,11 @@ $('#contact-form').addEventListener('submit', event => {
   }
   wishes.removeAttribute('aria-invalid');
   $('#wishes-error').hidden = true;
-  const work = works.find(item => item.name === $('#selected-work').value);
+  const work = works.find(item => item.id === $('#selected-work').value);
   $('#message-text').value = [
     'Ирина, здравствуйте! Увидела ваши украшения на сайте «Фарфория».',
-    `Мне интересно: ${$('#selected-work').value}.`,
-    work ? `Понравилась работа: https://t.me/farfforija/${work.post}` : '',
+    `Мне интересно: ${work?.name || $('#selected-work').value}.`,
+    work?.source ? `Понравилась работа: ${work.source}` : '',
     $('#occasion').value.trim() ? `Повод: ${$('#occasion').value.trim()}` : '',
     `Мои пожелания: ${wishes.value.trim()}`,
     'Подскажите, пожалуйста, возможность заказа, стоимость, сроки и способ получения.',
@@ -318,7 +358,7 @@ const info = {
   terms: { title: 'Условия обращения', paragraphs: [
     'На странице представлены примеры работ Ирины Маркиной. Галерея не подтверждает наличие украшения или возможность его точного повтора.',
     'Подготовка сообщения не оформляет заказ. Стоимость, материалы, сроки, оплату и способ получения необходимо согласовать непосредственно с мастером.',
-    'Контакты и фотографии взяты из авторского канала «Фарфория». Уточнить актуальные условия можно по телефону +7 921 907 72 53 или в личном диалоге VK.',
+    `Контакты и фотографии взяты из авторского канала «Фарфория». Уточнить актуальные условия можно по телефону ${pageContent.sections.phoneLabel} или в личном диалоге VK.`,
   ] },
 };
 $$('[data-info]').forEach(button => button.addEventListener('click', () => {

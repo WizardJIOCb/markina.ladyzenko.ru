@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <meta name="referrer" content="no-referrer">
+  <title>Мастерская · Фарфория</title>
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/admin/admin.css">
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script type="module" src="/admin/admin.js"></script>
+</head>
+<body>
+  <a class="skip" href="#editor">К редактору</a>
+  <div id="notice" role="status" aria-live="polite">Загружаем мастерскую…</div>
+  <main id="auth" class="auth" hidden>
+    <a class="brand" href="/">✳ фарфория</a>
+    <p class="eyebrow">Мастерская Ирины Маркиной</p>
+    <h1 id="auth-title">Вход в админку</h1>
+    <p id="auth-description">Введите пароль, чтобы редактировать сайт.</p>
+    <form id="auth-form">
+      <label>Пароль<input id="auth-password" type="password" autocomplete="current-password" required maxlength="256"></label>
+      <label id="repeat-label" hidden>Повторите пароль<input id="auth-repeat" type="password" autocomplete="new-password" maxlength="256"></label>
+      <button id="auth-submit" type="submit">Войти</button>
+      <p id="auth-error" class="error" role="alert"></p>
+    </form>
+    <a href="/" class="subtle">← Вернуться на сайт</a>
+  </main>
+  <div id="workspace" hidden>
+    <header class="topbar"><a class="brand" href="/admin/">✳ фарфория <span>мастерская</span></a><div class="top-actions"><a href="/" target="_blank" rel="noopener">Открыть сайт ↗</a><button id="save" disabled>Сохранить на сайте</button></div></header>
+    <div class="layout">
+      <aside><nav id="navigation" aria-label="Разделы админки"></nav><div class="sidebar-note"><p>Изменения появляются на сайте после сохранения.</p><button class="quiet" id="download">Скачать копию</button><button class="quiet" id="logout">Выйти</button></div></aside>
+      <main id="editor" tabindex="-1"></main>
+    </div>
+  </div>
+  <dialog id="media-dialog" aria-labelledby="media-title"><div class="dialog-heading"><div><p class="eyebrow">Библиотека фотографий</p><h2 id="media-title">Выберите фотографию</h2></div><button class="secondary" data-close="media-dialog" aria-label="Закрыть фотографии">Закрыть</button></div><p>JPEG, PNG или WebP до 12 МБ и 24 мегапикселей. Фото автоматически уменьшается и очищается от метаданных.</p><label class="upload">Загрузить новую фотографию<input id="upload" type="file" accept="image/jpeg,image/png,image/webp"></label><p id="media-status" role="status"></p><div id="media-grid" class="media-grid"></div></dialog>
+  <dialog id="confirm-dialog" aria-labelledby="confirm-title"><h2 id="confirm-title"></h2><p id="confirm-text"></p><div class="actions"><button id="confirm-yes">Продолжить</button><button class="secondary" data-close="confirm-dialog">Отмена</button></div></dialog>
+</body>
+</html>

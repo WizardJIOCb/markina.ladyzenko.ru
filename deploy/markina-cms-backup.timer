@@ -1,0 +1,8 @@
+[Unit]
+Description=Daily Farforiya database backup
+[Timer]
+OnCalendar=*-*-* 03:40:00
+RandomizedDelaySec=10m
+Persistent=true
+[Install]
+WantedBy=timers.target

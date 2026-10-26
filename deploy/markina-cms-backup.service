@@ -1,0 +1,13 @@
+[Unit]
+Description=Backup Farforiya content database
+[Service]
+Type=oneshot
+User=markina-cms
+Group=markina-cms
+Environment=MARKINA_DATA=/var/lib/markina-cms
+UMask=0027
+ExecStart=/opt/markina-cms-venv/bin/python /var/www/markina.ladyzenko.ru/server/backup.py
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/lib/markina-cms
