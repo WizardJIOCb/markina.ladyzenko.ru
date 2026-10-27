@@ -6,7 +6,7 @@ User=markina-cms
 Group=markina-cms
 Environment=MARKINA_DATA=/var/lib/markina-cms
 UMask=0027
-ExecStart=/opt/markina-cms-venv/bin/python /var/www/markina.ladyzenko.ru/server/backup.py
+ExecStart=/opt/markina-cms-venv/bin/python /var/www/markinai.ru/server/backup.py
 NoNewPrivileges=true
 ProtectSystem=strict
 ProtectHome=true

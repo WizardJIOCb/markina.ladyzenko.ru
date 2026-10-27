@@ -3,4 +3,4 @@ Disallow: /admin/
 Disallow: /api/
 Allow: /
 
-Sitemap: https://markina.ladyzenko.ru/sitemap.xml
+Sitemap: https://markinai.ru/sitemap.xml

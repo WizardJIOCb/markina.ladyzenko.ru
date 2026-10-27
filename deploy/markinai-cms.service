@@ -1,0 +1,30 @@
+[Unit]
+Description=Farforiya content management API for markinai.ru
+After=network.target
+
+[Service]
+Type=simple
+User=markina-cms
+Group=markina-cms
+WorkingDirectory=/var/www/markinai.ru
+Environment=MARKINA_DATA=/var/lib/markina-cms
+Environment=MARKINA_ORIGIN=https://markinai.ru
+Environment=PYTHONDONTWRITEBYTECODE=1
+ExecStart=/opt/markina-cms-venv/bin/gunicorn --chdir server --bind 127.0.0.1:8322 --workers 1 --threads 2 --timeout 30 --error-logfile - app:app
+Restart=on-failure
+RestartSec=3
+StateDirectory=markina-cms
+StateDirectoryMode=0750
+UMask=0027
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ProtectKernelTunables=true
+ProtectControlGroups=true
+RestrictSUIDSGID=true
+ReadWritePaths=/var/lib/markina-cms
+MemoryMax=512M
+
+[Install]
+WantedBy=multi-user.target
