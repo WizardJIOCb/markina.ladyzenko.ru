@@ -72,6 +72,8 @@ runuser -u markina-cms -- env MARKINA_DATA=/var/lib/markina-cms MARKINA_ORIGIN=h
 
 Для выпуска сертификата оба имени должны быть делегированы в `.ru` и разрешаться в `82.146.42.213` через публичный DNS. Наличие A записей только на DNS серверах регистратора ещё не подтверждает публичное делегирование. Проверка: `dig NS markinai.ru @a.dns.ripn.net +norecurse`, `dig A markinai.ru @1.1.1.1`, `dig A www.markinai.ru @1.1.1.1`.
 
+Если делегирование ещё обновляется, можно завершить именно этот перенос одноразовой службой: установить `deploy/markinai-https-once.service` в `/etc/systemd/system/`, выполнить `systemctl daemon-reload` и `systemctl enable --now --no-block markinai-https-once.service`. Она до 24 часов проверяет оба A адреса через `1.1.1.1` и `8.8.8.8` каждые две минуты. После готовности один раз запускает выпуск сертификата и активацию HTTPS. Ошибка выпуска завершает службу без повторных ACME запросов. Успех отмечается `/var/lib/markina-cms/markinai-https.ready`, после чего служба больше не выполняется. Статус: `systemctl status markinai-https-once.service`, журнал: `journalctl -u markinai-https-once.service`. Обычное продление сертификата затем выполняет существующий Certbot timer.
+
 При первом размещении клонировать репозиторий в указанный каталог, установить `deploy/nginx-http.conf` под именем `markinai.ru.conf`, создать ссылку в `sites-enabled`, выполнить `nginx -t` и `systemctl reload nginx`. Выпустить сертификат:
 
 ```sh

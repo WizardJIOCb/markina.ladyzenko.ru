@@ -1,0 +1,16 @@
+[Unit]
+Description=Complete markinai.ru HTTPS deployment after DNS becomes public
+After=network-online.target nginx.service markinai-cms.service
+Wants=network-online.target
+ConditionPathExists=!/var/lib/markina-cms/markinai-https.ready
+
+[Service]
+Type=oneshot
+WorkingDirectory=/var/www/markinai.ru
+ExecStart=/usr/bin/bash /var/www/markinai.ru/deploy/wait-for-https.sh
+TimeoutStartSec=25h
+RemainAfterExit=yes
+UMask=0027
+
+[Install]
+WantedBy=multi-user.target
