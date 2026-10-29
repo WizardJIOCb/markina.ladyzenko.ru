@@ -89,6 +89,14 @@ certbot certonly --webroot \
 
 ## Обновление
 
+### Домен синоним FARFORMER.RU
+
+`farformer.ru` и `www.farformer.ru` перенаправляются кодом 301 на `https://markinai.ru` с сохранением пути и query параметров. Для этих двух имён используется отдельный сертификат Let's Encrypt, webroot `/var/www/markinai.ru/public`; сертификат основного домена не меняется.
+
+Из `/var/www/markinai.ru`: `bash deploy/install-farformer.sh` устанавливает HTTP конфигурацию до выпуска сертификата и HTTPS конфигурацию после. Затем `bash deploy/activate-farformer.sh` проверяет A/AAAA через два публичных резолвера, выпускает сертификат и проверяет перенаправление. Пока DNS не готов, код выхода 75 означает, что ACME запрос не отправлялся.
+
+Для ожидания обновления DNS установить `deploy/farformer-https-once.service` в `/etc/systemd/system/`, выполнить `systemctl daemon-reload` и `systemctl enable --now --no-block farformer-https-once.service`. Служба ждёт до 24 часов и делает одну попытку выпуска после готовности DNS; успех отмечается `/var/lib/farformer-redirect/https.ready`. Журнал: `journalctl -u farformer-https-once.service`. Действующий Nginx vhost синонима — `/etc/nginx/sites-available/farformer.ru.conf`.
+
 После публикации изменений в `main`:
 
 ```sh
